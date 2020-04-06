@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
@@ -32,6 +34,8 @@ import reactor.core.publisher.Mono;
 @Service
 public class ViajesHandlerImpl implements ViajesHandlerI {
 
+	private Logger log = LoggerFactory.getLogger(ViajesHandlerImpl.class);
+
 	@Autowired
 	MudanzaRepository repository;
 
@@ -41,14 +45,11 @@ public class ViajesHandlerImpl implements ViajesHandlerI {
 		model.setDocumento(request.pathVariable("documento"));
 		model.setNombreArchivo(request.pathVariable("resource"));
 		return ServerResponse.ok().contentType(MediaType.TEXT_EVENT_STREAM)
-				.body(obtenerDatos(request.pathVariable("resource")).map(listaDatos -> obtenerCasos(listaDatos))
-						.flatMapMany(Flux::fromIterable)
-						.delayElements(Duration.ofSeconds(1))
-						.doOnNext(caso -> {
-							model.getCasos().add(new CasoModel(caso.getElementosPorTransportar(), caso.getCantidadViajes()));
-						})
-						.doOnComplete(() -> repository.save(model).subscribe())
-						, Caso.class)
+				.body(obtenerDatos(request.pathVariable("resource")).map(this::obtenerCasos)
+						.flatMapMany(Flux::fromIterable).delayElements(Duration.ofSeconds(1))
+						.doOnNext(caso -> model.getCasos()
+								.add(new CasoModel(caso.getElementosPorTransportar(), caso.getCantidadViajes())))
+						.doOnComplete(() -> repository.save(model).subscribe()), Caso.class)
 				.onErrorResume(throwable -> Mono.error(new Exception(throwable)));
 	}
 
@@ -60,10 +61,13 @@ public class ViajesHandlerImpl implements ViajesHandlerI {
 				datos = br.lines().map(Integer::parseInt).filter(peso -> peso > 0).collect(Collectors.toList());
 				br.close();
 			} catch (FileNotFoundException e) {
+				log.error("Archivo no encontrado", e);
 				return Mono.error(new TechnicalException(e.getMessage(), 500));
 			} catch (IOException e) {
+				log.error("Error de entrada/salida de datos", e);
 				return Mono.error(new TechnicalException(e.getMessage(), 500));
 			} catch (NumberFormatException e) {
+				log.error("Error al procesar el archivo", e);
 				return Mono.error(new BusinessException(e.getMessage(), 500));
 			}
 			return Mono.just(datos);

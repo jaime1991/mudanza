@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.http.codec.multipart.Part;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,8 @@ import reactor.core.publisher.Mono;
 @Service
 public class ArchivosHandlerImpl implements ArchivosHandlerI {
 
+	private Logger log = LoggerFactory.getLogger(ArchivosHandlerImpl.class);
+	
 	@Override
 	public Mono<ServerResponse> uploadFile(ServerRequest request) {
 		return request.body(BodyExtractors.toMultipartData()).flatMap(p -> {
@@ -48,10 +52,13 @@ public class ArchivosHandlerImpl implements ArchivosHandlerI {
 				datos = br.lines().map(Integer::parseInt).filter(peso -> peso > 0).collect(Collectors.toList());
 				br.close();
 			} catch (FileNotFoundException e) {
+				log.error("Archivo no encontrado", e);
 				return Mono.error(new TechnicalException(e.getMessage(), 500));
 			} catch (IOException e) {
+				log.error("Error de entrada/salida de datos", e);
 				return Mono.error(new TechnicalException(e.getMessage(), 500));
 			} catch (NumberFormatException e) {
+				log.error("Error al procesar el archivo", e);
 				return Mono.error(new BusinessException(e.getMessage(), 500));
 			}
 			return Mono.just(datos);
@@ -59,10 +66,9 @@ public class ArchivosHandlerImpl implements ArchivosHandlerI {
 	}
 
 	private Mono<EstadoCargaDto> validarEstadoCarga(String file) {
-		return obtenerDatos(file).map(list -> {
-			return contendioValido(list) ? new EstadoCargaDto("200", "recurso correcto", file)
-					: new EstadoCargaDto("500", "el recurso no es valido", null);
-		});
+		return obtenerDatos(file)
+				.map(list -> contendioValido(list) ? new EstadoCargaDto("200", "recurso correcto", file)
+						: new EstadoCargaDto("500", "el recurso no es valido", null));
 	}
 
 	private boolean contendioValido(List<Integer> datos) {

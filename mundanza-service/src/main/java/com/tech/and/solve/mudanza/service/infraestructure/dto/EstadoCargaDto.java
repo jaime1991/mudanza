@@ -4,13 +4,13 @@ public class EstadoCargaDto {
 
 	private String codigo;
 	private String descripcion;
-	private String recurso_id;
+	private String recursoId;
 		
-	public EstadoCargaDto(String codigo, String descripcion, String recurso_id) {
+	public EstadoCargaDto(String codigo, String descripcion, String recursoId) {
 		super();
 		this.codigo = codigo;
 		this.descripcion = descripcion;
-		this.recurso_id = recurso_id;
+		this.recursoId = recursoId;
 	}
 	
 	public String getCodigo() {
@@ -25,11 +25,11 @@ public class EstadoCargaDto {
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
 	}
-	public String getRecurso_id() {
-		return recurso_id;
+	public String getRecursoId() {
+		return recursoId;
 	}
-	public void setRecurso_id(String recurso_id) {
-		this.recurso_id = recurso_id;
+	public void setRecursoId(String recursoId) {
+		this.recursoId = recursoId;
 	}
 	
 }
