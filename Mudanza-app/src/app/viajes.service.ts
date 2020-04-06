@@ -10,7 +10,7 @@ export class ViajesService {
 
   constructor(private _zone: NgZone) { }
 
-  testFlux(recurso: string, documento: string): Observable<any> {
+  verificarViaje(recurso: string, documento: string): Observable<any> {
     return Observable.create(observer => {
       const eventSource = new EventSource(env.verificarViajesUri+'/'+recurso+'/'+documento);
       eventSource.onmessage = event => {

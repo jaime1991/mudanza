@@ -34,8 +34,9 @@ export class ViajesVerificarComponent implements OnInit {
     this.mostrarBarra = true;
     this.serviceArchivos.postFile(this.archivo).subscribe(
       resp => {
+        console.log(resp);
         if (resp.codigo == 200) {
-          this.resource = resp.recurso_id;
+          this.resource = resp.recursoId;
           this.verificarViajes();
         }
       },
@@ -55,7 +56,7 @@ export class ViajesVerificarComponent implements OnInit {
     let casos = 1;
     this.progreso = "";
     this.resultado = [];
-    this.serviceViajes.testFlux(this.resource, this.documento.value).subscribe(
+    this.serviceViajes.verificarViaje(this.resource, this.documento.value).subscribe(
       x => {
         this.logger.setValue(this.logger.value + 'Observer got a next value: ' + x.data + '\n');
         this.resultado.push('Case #' + casos + ':' + JSON.parse(x.data).cantidadViajes+'\n');
@@ -71,9 +72,8 @@ export class ViajesVerificarComponent implements OnInit {
   }
 
   crearArchivoTexto(texto: string): void {
-    texto.replace(",","");
     var textFile = null;
-    var data = new Blob([texto], { type: 'text/plain' });
+    var data = new Blob([texto.replace(/,/g, "")], { type: 'text/plain' });
     if (textFile !== null) {
       window.URL.revokeObjectURL(textFile);
     }
