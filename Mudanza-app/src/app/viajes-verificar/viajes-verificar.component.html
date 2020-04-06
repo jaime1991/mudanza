@@ -1,0 +1,30 @@
+<br>
+<div class="col-12 text-center row">
+    <div class="col-md-5 col-xs-12">
+        <input type="file" name="file" (change)="handleFileInput($event.target.files)" />
+    </div>
+
+    <div class="col-md-5 col-xs-12">
+        <input type="text" class="form-control" name="documento" placeholder="Numero de documento"
+            [formControl]="documento" />
+    </div>
+
+    <div class="col-md-2 col-xs-12">
+        <button class='btn btn-success' (click)='cargarArchivo()'>
+            Verificar Viajes
+        </button>
+    </div>
+</div>
+<div class="col-12 mt-md-4">
+    <div class="progress" [hidden]="!mostrarBarra">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar"
+    aria-valuemin="0" aria-valuemax="100" [style.width]="progreso + '%'" ></div>
+    </div>
+    <h3>Consola</h3>
+    <textarea id='inputPassword' class='form-control' [formControl]="logger" rows="5" cols="4">
+
+    </textarea>
+    <div class="col-md-12 col-xs-12 text-center mb-md-3" id="resultadoCarga">
+
+    </div>
+</div>
